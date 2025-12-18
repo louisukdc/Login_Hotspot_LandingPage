@@ -1,0 +1,84 @@
+let popup = document.getElementById("security-popup");
+let overlay = document.getElementById("overlay");
+
+
+let slideIndex = 0;
+const SLIDE_INTERVAL = 3000; 
+let slideshowTimer;
+let slideWrapper;
+
+// Fungsi untuk menampilkan slide berikutnya
+function showNextSlide() {
+    if (!slideWrapper) {
+        // Coba cari lagi jika belum ada
+        slideWrapper = document.getElementById("slide-wrapper");
+        if (!slideWrapper) return; 
+    }
+
+    const totalSlides = slideWrapper.children.length;
+
+    // Perhitungan slide
+    slideIndex = (slideIndex + 1) % totalSlides;
+
+    // Terapkan geseran
+    slideWrapper.style.transform = `translateX(-${slideIndex * (100 / totalSlides)}%)`;
+}
+
+
+// Fungsi untuk memulai slideshow (Halaman Utama)
+function startSlideshow() {
+    if (slideshowTimer) clearInterval(slideshowTimer);
+
+    // Cari elemen slideshow
+    slideWrapper = document.getElementById("slide-wrapper");
+
+    // Jika elemen belum tersedia, tunggu 100ms dan coba lagi (perbaikan untuk perangkat seluler)
+    if (!slideWrapper) {
+        setTimeout(startSlideshow, 100);
+        return;
+    }
+
+    // Reset dan mulai
+    slideIndex = 0;
+    slideWrapper.style.transform = `translateX(0%)`;
+    slideshowTimer = setInterval(showNextSlide, SLIDE_INTERVAL);
+}
+
+// Fungsi untuk menampilkan pop-up dan overlay
+function openPopup() {
+    if (popup && overlay) {
+        popup.classList.add("open-popup");
+        overlay.classList.add("open-overlay");
+        // Slideshow berjalan terpisah, tidak perlu dipanggil di sini.
+    }
+}
+
+// Fungsi untuk menyembunyikan pop-up, overlay, dan mengarahkan fokus ke username
+function closePopup() {
+
+    // Tidak perlu menghentikan slideshow, karena hanya pop-up yang ditutup
+    
+    if (popup && overlay) {
+        popup.classList.remove("open-popup");
+        overlay.classList.remove("open-overlay");
+    }
+    
+    // Set fokus ke input username
+    if (document.login && document.login.username) {
+        document.login.username.focus();
+    }
+}
+
+// Panggil startSlideshow() dan openPopup() setelah DOM siap
+document.addEventListener('DOMContentLoaded', (event) => {
+    // 1. Mulai Slideshow di halaman utama (langsung)
+    startSlideshow();
+    
+    // 2. Tampilkan pop-up keamanan setelah jeda singkat (misalnya 500ms)
+    setTimeout(openPopup, 500); 
+});
+
+// Fokus awal pada username (akan ditimpa oleh openPopup, tapi ini adalah fallback yang baik)
+if (document.login && document.login.username) {
+    document.login.username.focus();
+}
